@@ -338,7 +338,7 @@ function App() {
           >
             {svgMarkup ? (
               <div
-                className="aspect-square w-full max-w-72"
+                className="grid aspect-square w-full max-w-72 place-items-center [&_svg]:mx-auto [&_svg]:block [&_svg]:h-full [&_svg]:w-full"
                 dangerouslySetInnerHTML={{ __html: svgMarkup }}
               />
             ) : (
