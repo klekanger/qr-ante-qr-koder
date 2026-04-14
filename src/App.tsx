@@ -1,6 +1,22 @@
-import "./App.css";
 import { useEffect, useMemo, useState } from "react";
 import QRCode from "qrcode";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 type InputMode = "url" | "phone" | "email";
 type ExportFormat = "png" | "jpg" | "svg" | "eps";
@@ -253,118 +269,131 @@ function App() {
   }
 
   return (
-    <main className="app-shell">
-      <section className="card">
-        <h1>QR Code Maker</h1>
-        <p className="subtext">
-          Create QR codes for links, phone numbers, and email addresses.
-        </p>
+    <main className="mx-auto flex min-h-screen w-full max-w-5xl items-center justify-center px-4 py-10">
+      <Card className="w-full max-w-2xl">
+        <CardHeader className="space-y-2">
+          <CardTitle className="text-3xl">QR Code Maker</CardTitle>
+          <CardDescription>
+            Create QR codes for links, phone numbers, and email addresses.
+          </CardDescription>
+        </CardHeader>
 
-        <div className="field">
-          <label htmlFor="mode">Type</label>
-          <select
-            id="mode"
-            value={mode}
-            onChange={(event) => setMode(event.target.value as InputMode)}
-          >
-            <option value="url">URL</option>
-            <option value="phone">Phone</option>
-            <option value="email">Email</option>
-          </select>
-        </div>
-
-        {mode === "url" && (
-          <div className="field">
-            <label htmlFor="url">URL</label>
-            <input
-              id="url"
-              type="url"
-              placeholder="https://example.com"
-              value={urlValue}
-              onChange={(event) => setUrlValue(event.target.value)}
-            />
+        <CardContent className="space-y-5">
+          <div className="grid gap-2">
+            <Label htmlFor="mode">Type</Label>
+            <Select value={mode} onValueChange={(value) => setMode(value as InputMode)}>
+              <SelectTrigger id="mode" className="w-full">
+                <SelectValue placeholder="Select type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="url">URL</SelectItem>
+                <SelectItem value="phone">Phone</SelectItem>
+                <SelectItem value="email">Email</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
-        )}
 
-        {mode === "phone" && (
-          <div className="field">
-            <label htmlFor="phone">Phone Number</label>
-            <input
-              id="phone"
-              type="tel"
-              placeholder="+47 123 45 678"
-              value={phoneValue}
-              onChange={(event) => setPhoneValue(event.target.value)}
-            />
-          </div>
-        )}
-
-        {mode === "email" && (
-          <div className="field">
-            <label htmlFor="email">Email Address</label>
-            <input
-              id="email"
-              type="email"
-              placeholder="you@example.com"
-              value={emailValue}
-              onChange={(event) => setEmailValue(event.target.value)}
-            />
-          </div>
-        )}
-
-        <div className="preview-wrap" aria-live="polite">
-          {svgMarkup ? (
-            <div
-              className="qr-preview"
-              dangerouslySetInnerHTML={{ __html: svgMarkup }}
-            />
-          ) : (
-            <div className="placeholder">QR preview appears here.</div>
+          {mode === "url" && (
+            <div className="grid gap-2">
+              <Label htmlFor="url">URL</Label>
+              <Input
+                id="url"
+                type="url"
+                placeholder="https://example.com"
+                value={urlValue}
+                onChange={(event) => setUrlValue(event.target.value)}
+              />
+            </div>
           )}
-        </div>
 
-        {previewError && <p className="message error">{previewError}</p>}
+          {mode === "phone" && (
+            <div className="grid gap-2">
+              <Label htmlFor="phone">Phone Number</Label>
+              <Input
+                id="phone"
+                type="tel"
+                placeholder="+47 123 45 678"
+                value={phoneValue}
+                onChange={(event) => setPhoneValue(event.target.value)}
+              />
+            </div>
+          )}
 
-        <div className="download-controls">
-          <div className="field">
-            <label htmlFor="format">Format</label>
-            <select
-              id="format"
-              value={format}
-              onChange={(event) => setFormat(event.target.value as ExportFormat)}
-            >
-              <option value="png">PNG</option>
-              <option value="jpg">JPG</option>
-              <option value="svg">SVG</option>
-              <option value="eps">EPS</option>
-            </select>
+          {mode === "email" && (
+            <div className="grid gap-2">
+              <Label htmlFor="email">Email Address</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="you@example.com"
+                value={emailValue}
+                onChange={(event) => setEmailValue(event.target.value)}
+              />
+            </div>
+          )}
+
+          <div
+            className="grid min-h-72 place-items-center rounded-xl border bg-white p-4"
+            aria-live="polite"
+          >
+            {svgMarkup ? (
+              <div
+                className="aspect-square w-full max-w-72"
+                dangerouslySetInnerHTML={{ __html: svgMarkup }}
+              />
+            ) : (
+              <p className="text-sm text-muted-foreground">QR preview appears here.</p>
+            )}
           </div>
 
-          <div className="field">
-            <label htmlFor="resolution">Resolution</label>
-            <select
-              id="resolution"
-              value={resolution}
-              onChange={(event) =>
-                setResolution(Number(event.target.value) as (typeof RASTER_RESOLUTIONS)[number])
-              }
-              disabled={format === "svg" || format === "eps"}
-            >
-              {RASTER_RESOLUTIONS.map((size) => (
-                <option key={size} value={size}>
-                  {size} x {size}
-                </option>
-              ))}
-            </select>
+          {previewError && <p className="text-sm text-destructive">{previewError}</p>}
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid gap-2">
+              <Label htmlFor="format">Format</Label>
+              <Select value={format} onValueChange={(value) => setFormat(value as ExportFormat)}>
+                <SelectTrigger id="format" className="w-full">
+                  <SelectValue placeholder="Select format" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="png">PNG</SelectItem>
+                  <SelectItem value="jpg">JPG</SelectItem>
+                  <SelectItem value="svg">SVG</SelectItem>
+                  <SelectItem value="eps">EPS</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="resolution">Resolution</Label>
+              <Select
+                value={String(resolution)}
+                onValueChange={(value) =>
+                  setResolution(Number(value) as (typeof RASTER_RESOLUTIONS)[number])
+                }
+                disabled={format === "svg" || format === "eps"}
+              >
+                <SelectTrigger id="resolution" className="w-full">
+                  <SelectValue placeholder="Select resolution" />
+                </SelectTrigger>
+                <SelectContent>
+                  {RASTER_RESOLUTIONS.map((size) => (
+                    <SelectItem key={size} value={String(size)}>
+                      {size} x {size}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
-        </div>
 
-        <button type="button" onClick={handleDownload} disabled={!canDownload}>
-          {isDownloading ? "Preparing..." : "Download QR Code"}
-        </button>
+          <Button type="button" onClick={handleDownload} disabled={!canDownload} className="w-full">
+            {isDownloading ? "Preparing..." : "Download QR Code"}
+          </Button>
 
-        {downloadError && <p className="message error">{downloadError}</p>}
-      </section>
+          {downloadError && <p className="text-sm text-destructive">{downloadError}</p>}
+        </CardContent>
+      </Card>
     </main>
   );
 }
