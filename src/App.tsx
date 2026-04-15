@@ -285,7 +285,7 @@ function App() {
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-5xl items-center justify-center px-4 py-10">
-      <Card className="w-full max-w-2xl">
+      <Card className="w-full max-w-2xl lg:max-w-5xl">
         <CardHeader className="space-y-2">
           <CardTitle className="text-3xl">QR Code Maker</CardTitle>
           <CardDescription>
@@ -293,139 +293,146 @@ function App() {
           </CardDescription>
         </CardHeader>
 
-        <CardContent className="space-y-5">
-          <div className="grid gap-2">
-            <Label htmlFor="mode">Type</Label>
-            <Select
-              value={mode}
-              onValueChange={(value) => setMode(value as InputMode)}
+        <CardContent className="flex flex-col gap-5 lg:flex-row lg:items-stretch lg:gap-8">
+          {/* Form + export: full width on small screens, left column on lg+ */}
+          <div className="flex min-w-0 flex-1 flex-col gap-5">
+            <div className="grid gap-2">
+              <Label htmlFor="mode">Type</Label>
+              <Select
+                value={mode}
+                onValueChange={(value) => setMode(value as InputMode)}
+              >
+                <SelectTrigger id="mode" className="w-full">
+                  <SelectValue placeholder="Select type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="url">URL</SelectItem>
+                  <SelectItem value="phone">Phone</SelectItem>
+                  <SelectItem value="email">Email</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {mode === "url" && (
+              <div className="grid gap-2">
+                <Label htmlFor="url">URL</Label>
+                <Input
+                  id="url"
+                  type="url"
+                  placeholder="https://example.com"
+                  value={urlValue}
+                  onChange={(event) => setUrlValue(event.target.value)}
+                />
+              </div>
+            )}
+
+            {mode === "phone" && (
+              <div className="grid gap-2">
+                <Label htmlFor="phone">Phone Number</Label>
+                <Input
+                  id="phone"
+                  type="tel"
+                  placeholder="+47 123 45 678"
+                  value={phoneValue}
+                  onChange={(event) => setPhoneValue(event.target.value)}
+                />
+              </div>
+            )}
+
+            {mode === "email" && (
+              <div className="grid gap-2">
+                <Label htmlFor="email">Email Address</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="you@example.com"
+                  value={emailValue}
+                  onChange={(event) => setEmailValue(event.target.value)}
+                />
+              </div>
+            )}
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="grid gap-2">
+                <Label htmlFor="format">Format</Label>
+                <Select
+                  value={format}
+                  onValueChange={(value) => setFormat(value as ExportFormat)}
+                >
+                  <SelectTrigger id="format" className="w-full">
+                    <SelectValue placeholder="Select format" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="png">PNG</SelectItem>
+                    <SelectItem value="jpg">JPG</SelectItem>
+                    <SelectItem value="svg">SVG</SelectItem>
+                    <SelectItem value="eps">EPS</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="resolution">Resolution</Label>
+                <Select
+                  value={String(resolution)}
+                  onValueChange={(value) =>
+                    setResolution(
+                      Number(value) as (typeof RASTER_RESOLUTIONS)[number]
+                    )
+                  }
+                  disabled={format === "svg" || format === "eps"}
+                >
+                  <SelectTrigger id="resolution" className="w-full">
+                    <SelectValue placeholder="Select resolution" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {RASTER_RESOLUTIONS.map((size) => (
+                      <SelectItem key={size} value={String(size)}>
+                        {size} x {size}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <Button
+              type="button"
+              onClick={handleDownload}
+              disabled={!canDownload}
+              className="w-full"
             >
-              <SelectTrigger id="mode" className="w-full">
-                <SelectValue placeholder="Select type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="url">URL</SelectItem>
-                <SelectItem value="phone">Phone</SelectItem>
-                <SelectItem value="email">Email</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+              {isDownloading ? "Preparing..." : "Download QR Code"}
+            </Button>
 
-          {mode === "url" && (
-            <div className="grid gap-2">
-              <Label htmlFor="url">URL</Label>
-              <Input
-                id="url"
-                type="url"
-                placeholder="https://example.com"
-                value={urlValue}
-                onChange={(event) => setUrlValue(event.target.value)}
-              />
-            </div>
-          )}
-
-          {mode === "phone" && (
-            <div className="grid gap-2">
-              <Label htmlFor="phone">Phone Number</Label>
-              <Input
-                id="phone"
-                type="tel"
-                placeholder="+47 123 45 678"
-                value={phoneValue}
-                onChange={(event) => setPhoneValue(event.target.value)}
-              />
-            </div>
-          )}
-
-          {mode === "email" && (
-            <div className="grid gap-2">
-              <Label htmlFor="email">Email Address</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="you@example.com"
-                value={emailValue}
-                onChange={(event) => setEmailValue(event.target.value)}
-              />
-            </div>
-          )}
-
-          <div
-            className="grid min-h-72 place-items-center rounded-xl border bg-white p-4 aspect-4/3 mb-4"
-            aria-live="polite"
-          >
-            {svgMarkup ? (
-              <div
-                className="grid aspect-square w-full p-8 place-items-center [&_svg]:mx-auto [&_svg]:block [&_svg]:h-full [&_svg]:w-full"
-                dangerouslySetInnerHTML={{ __html: svgMarkup }}
-              />
-            ) : (
-              <p className="text-sm text-muted-foreground">
-                QR preview appears here.
-              </p>
+            {downloadError && (
+              <p className="text-sm text-destructive">{downloadError}</p>
             )}
           </div>
 
-          {previewError && (
-            <p className="text-sm text-destructive">{previewError}</p>
-          )}
-
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="grid gap-2">
-              <Label htmlFor="format">Format</Label>
-              <Select
-                value={format}
-                onValueChange={(value) => setFormat(value as ExportFormat)}
-              >
-                <SelectTrigger id="format" className="w-full">
-                  <SelectValue placeholder="Select format" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="png">PNG</SelectItem>
-                  <SelectItem value="jpg">JPG</SelectItem>
-                  <SelectItem value="svg">SVG</SelectItem>
-                  <SelectItem value="eps">EPS</SelectItem>
-                </SelectContent>
-              </Select>
+          {/* Preview: below form on small screens, right column on lg+ */}
+          <div className="flex shrink-0 flex-col gap-2 lg:w-80 lg:max-w-[min(22rem,40vw)] lg:self-stretch">
+            <div
+              className="grid min-h-72 place-items-center rounded-xl border bg-white p-4 lg:min-h-[18rem] lg:flex-1"
+              aria-live="polite"
+            >
+              {svgMarkup ? (
+                <div
+                  className="grid aspect-square w-full max-w-72 place-items-center p-4 lg:max-w-none lg:p-6 [&_svg]:mx-auto [&_svg]:block [&_svg]:h-full [&_svg]:w-full"
+                  dangerouslySetInnerHTML={{ __html: svgMarkup }}
+                />
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  QR preview appears here.
+                </p>
+              )}
             </div>
-
-            <div className="grid gap-2">
-              <Label htmlFor="resolution">Resolution</Label>
-              <Select
-                value={String(resolution)}
-                onValueChange={(value) =>
-                  setResolution(
-                    Number(value) as (typeof RASTER_RESOLUTIONS)[number]
-                  )
-                }
-                disabled={format === "svg" || format === "eps"}
-              >
-                <SelectTrigger id="resolution" className="w-full">
-                  <SelectValue placeholder="Select resolution" />
-                </SelectTrigger>
-                <SelectContent>
-                  {RASTER_RESOLUTIONS.map((size) => (
-                    <SelectItem key={size} value={String(size)}>
-                      {size} x {size}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            {previewError && (
+              <p className="text-sm text-destructive lg:text-center">
+                {previewError}
+              </p>
+            )}
           </div>
-
-          <Button
-            type="button"
-            onClick={handleDownload}
-            disabled={!canDownload}
-            className="w-full"
-          >
-            {isDownloading ? "Preparing..." : "Download QR Code"}
-          </Button>
-
-          {downloadError && (
-            <p className="text-sm text-destructive">{downloadError}</p>
-          )}
         </CardContent>
       </Card>
     </main>
