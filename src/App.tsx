@@ -53,7 +53,10 @@ function validatePhone(rawPhone: string): boolean {
 }
 
 function escapePostScriptText(value: string): string {
-  return value.replace(/\\/g, "\\\\").replace(/\(/g, "\\(").replace(/\)/g, "\\)");
+  return value
+    .replace(/\\/g, "\\\\")
+    .replace(/\(/g, "\\(")
+    .replace(/\)/g, "\\)");
 }
 
 function buildEpsFromQrPayload(payload: string): string {
@@ -103,16 +106,19 @@ function triggerDownload(filename: string, blob: Blob): void {
 async function svgToRasterBlob(
   svgMarkup: string,
   size: number,
-  mimeType: "image/png" | "image/jpeg",
+  mimeType: "image/png" | "image/jpeg"
 ): Promise<Blob> {
-  const svgBlob = new Blob([svgMarkup], { type: "image/svg+xml;charset=utf-8" });
+  const svgBlob = new Blob([svgMarkup], {
+    type: "image/svg+xml;charset=utf-8",
+  });
   const svgObjectUrl = URL.createObjectURL(svgBlob);
   const image = new Image();
   image.decoding = "async";
 
   await new Promise<void>((resolve, reject) => {
     image.onload = () => resolve();
-    image.onerror = () => reject(new Error("Could not load SVG for raster export."));
+    image.onerror = () =>
+      reject(new Error("Could not load SVG for raster export."));
     image.src = svgObjectUrl;
   });
 
@@ -149,9 +155,8 @@ function App() {
   const [phoneValue, setPhoneValue] = useState("");
   const [emailValue, setEmailValue] = useState("");
   const [format, setFormat] = useState<ExportFormat>("png");
-  const [resolution, setResolution] = useState<(typeof RASTER_RESOLUTIONS)[number]>(
-    512,
-  );
+  const [resolution, setResolution] =
+    useState<(typeof RASTER_RESOLUTIONS)[number]>(512);
   const [svgMarkup, setSvgMarkup] = useState("");
   const [previewError, setPreviewError] = useState("");
   const [downloadError, setDownloadError] = useState("");
@@ -187,9 +192,14 @@ function App() {
     }
 
     const value = emailValue.trim();
-    if (!value) return { valid: false, payload: "", message: "Enter an email address." };
+    if (!value)
+      return { valid: false, payload: "", message: "Enter an email address." };
     if (!validateEmail(value)) {
-      return { valid: false, payload: "", message: "Use a valid email address." };
+      return {
+        valid: false,
+        payload: "",
+        message: "Use a valid email address.",
+      };
     }
     return { valid: true, payload: `mailto:${value}`, message: "" };
   }, [mode, urlValue, phoneValue, emailValue]);
@@ -226,7 +236,8 @@ function App() {
     };
   }, [payloadState]);
 
-  const canDownload = payloadState.valid && svgMarkup.length > 0 && !isDownloading;
+  const canDownload =
+    payloadState.valid && svgMarkup.length > 0 && !isDownloading;
 
   const filePrefix = useMemo(() => {
     const base = mode === "url" ? "url" : mode === "phone" ? "phone" : "email";
@@ -242,7 +253,7 @@ function App() {
       if (format === "svg") {
         triggerDownload(
           `${filePrefix}.svg`,
-          new Blob([svgMarkup], { type: "image/svg+xml;charset=utf-8" }),
+          new Blob([svgMarkup], { type: "image/svg+xml;charset=utf-8" })
         );
         return;
       }
@@ -251,7 +262,9 @@ function App() {
         const epsContent = buildEpsFromQrPayload(payloadState.payload);
         triggerDownload(
           `${filePrefix}.eps`,
-          new Blob([epsContent], { type: "application/postscript;charset=utf-8" }),
+          new Blob([epsContent], {
+            type: "application/postscript;charset=utf-8",
+          })
         );
         return;
       }
@@ -261,7 +274,9 @@ function App() {
       triggerDownload(`${filePrefix}.${format}`, blob);
     } catch (error) {
       setDownloadError(
-        error instanceof Error ? error.message : "Something went wrong during export.",
+        error instanceof Error
+          ? error.message
+          : "Something went wrong during export."
       );
     } finally {
       setIsDownloading(false);
@@ -281,7 +296,10 @@ function App() {
         <CardContent className="space-y-5">
           <div className="grid gap-2">
             <Label htmlFor="mode">Type</Label>
-            <Select value={mode} onValueChange={(value) => setMode(value as InputMode)}>
+            <Select
+              value={mode}
+              onValueChange={(value) => setMode(value as InputMode)}
+            >
               <SelectTrigger id="mode" className="w-full">
                 <SelectValue placeholder="Select type" />
               </SelectTrigger>
@@ -333,25 +351,32 @@ function App() {
           )}
 
           <div
-            className="grid min-h-72 place-items-center rounded-xl border bg-white p-4"
+            className="grid min-h-72 place-items-center rounded-xl border bg-white p-4 aspect-4/3 mb-4"
             aria-live="polite"
           >
             {svgMarkup ? (
               <div
-                className="grid aspect-square w-full max-w-72 place-items-center [&_svg]:mx-auto [&_svg]:block [&_svg]:h-full [&_svg]:w-full"
+                className="grid aspect-square w-full p-8 place-items-center [&_svg]:mx-auto [&_svg]:block [&_svg]:h-full [&_svg]:w-full"
                 dangerouslySetInnerHTML={{ __html: svgMarkup }}
               />
             ) : (
-              <p className="text-sm text-muted-foreground">QR preview appears here.</p>
+              <p className="text-sm text-muted-foreground">
+                QR preview appears here.
+              </p>
             )}
           </div>
 
-          {previewError && <p className="text-sm text-destructive">{previewError}</p>}
+          {previewError && (
+            <p className="text-sm text-destructive">{previewError}</p>
+          )}
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="grid gap-2">
               <Label htmlFor="format">Format</Label>
-              <Select value={format} onValueChange={(value) => setFormat(value as ExportFormat)}>
+              <Select
+                value={format}
+                onValueChange={(value) => setFormat(value as ExportFormat)}
+              >
                 <SelectTrigger id="format" className="w-full">
                   <SelectValue placeholder="Select format" />
                 </SelectTrigger>
@@ -369,7 +394,9 @@ function App() {
               <Select
                 value={String(resolution)}
                 onValueChange={(value) =>
-                  setResolution(Number(value) as (typeof RASTER_RESOLUTIONS)[number])
+                  setResolution(
+                    Number(value) as (typeof RASTER_RESOLUTIONS)[number]
+                  )
                 }
                 disabled={format === "svg" || format === "eps"}
               >
@@ -387,11 +414,18 @@ function App() {
             </div>
           </div>
 
-          <Button type="button" onClick={handleDownload} disabled={!canDownload} className="w-full">
+          <Button
+            type="button"
+            onClick={handleDownload}
+            disabled={!canDownload}
+            className="w-full"
+          >
             {isDownloading ? "Preparing..." : "Download QR Code"}
           </Button>
 
-          {downloadError && <p className="text-sm text-destructive">{downloadError}</p>}
+          {downloadError && (
+            <p className="text-sm text-destructive">{downloadError}</p>
+          )}
         </CardContent>
       </Card>
     </main>
