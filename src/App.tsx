@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import QRCode from "qrcode";
+import logoUrl from "@/assets/logo.webp";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -165,12 +166,13 @@ function App() {
   const payloadState = useMemo(() => {
     if (mode === "url") {
       const value = urlValue.trim();
-      if (!value) return { valid: false, payload: "", message: "Enter a URL." };
+      if (!value)
+        return { valid: false, payload: "", message: "Skriv inn en URL." };
       if (!validateUrl(value)) {
         return {
           valid: false,
           payload: "",
-          message: "Use a valid URL starting with http:// or https://.",
+          message: "Bruk en gyldig URL som starter med http:// eller https://.",
         };
       }
       return { valid: true, payload: value, message: "" };
@@ -179,13 +181,17 @@ function App() {
     if (mode === "phone") {
       const normalized = normalizePhone(phoneValue);
       if (!normalized) {
-        return { valid: false, payload: "", message: "Enter a phone number." };
+        return {
+          valid: false,
+          payload: "",
+          message: "Skriv inn et telefonnummer.",
+        };
       }
       if (!validatePhone(normalized)) {
         return {
           valid: false,
           payload: "",
-          message: "Use a valid phone number with 6-15 digits.",
+          message: "Bruk et gyldig telefonnummer.",
         };
       }
       return { valid: true, payload: `tel:${normalized}`, message: "" };
@@ -193,12 +199,16 @@ function App() {
 
     const value = emailValue.trim();
     if (!value)
-      return { valid: false, payload: "", message: "Enter an email address." };
+      return {
+        valid: false,
+        payload: "",
+        message: "Skriv inn en e-postadresse.",
+      };
     if (!validateEmail(value)) {
       return {
         valid: false,
         payload: "",
-        message: "Use a valid email address.",
+        message: "Bruk en gyldig e-postadresse.",
       };
     }
     return { valid: true, payload: `mailto:${value}`, message: "" };
@@ -228,7 +238,7 @@ function App() {
       .catch(() => {
         if (!active) return;
         setSvgMarkup("");
-        setPreviewError("Could not generate preview QR code.");
+        setPreviewError("Kunne ikke generere forhåndsvisning av QR-kode.");
       });
 
     return () => {
@@ -284,15 +294,23 @@ function App() {
   }
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-5xl items-center justify-center px-4 py-10">
-      <Card className="w-full max-w-2xl lg:max-w-5xl">
-        <CardHeader className="space-y-2">
-          <CardTitle className="text-3xl">QR Code Maker</CardTitle>
-          <CardDescription>
-            Create QR codes for links, phone numbers, and email addresses.
-          </CardDescription>
-        </CardHeader>
+    <main className="mx-auto flex min-h-screen w-full max-w-5xl flex-col items-center px-4 py-10 sm:py-12">
+      <header className="mb-10 flex w-full max-w-2xl flex-col items-center text-center lg:max-w-5xl">
+        <img
+          src={logoUrl}
+          alt="QR-ante"
+          width={280}
+          height={120}
+          decoding="async"
+          className="h-auto w-44 object-contain sm:w-52 md:w-60"
+        />
+        <p className="mt-5 max-w-2xl text-pretty text-base leading-relaxed text-muted-foreground sm:text-lg">
+          Lag QR-koder kjapt og enkelt. Ikke noe fjas &ndash; bare helt qr-ante
+          QR-koder!
+        </p>
+      </header>
 
+      <Card className="w-full max-w-2xl lg:max-w-5xl">
         <CardContent className="flex flex-col gap-5 lg:flex-row lg:items-stretch lg:gap-8">
           {/* Form + export: full width on small screens, left column on lg+ */}
           <div className="flex min-w-0 flex-1 flex-col gap-5">
@@ -307,8 +325,8 @@ function App() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="url">URL</SelectItem>
-                  <SelectItem value="phone">Phone</SelectItem>
-                  <SelectItem value="email">Email</SelectItem>
+                  <SelectItem value="phone">Telefonnummer</SelectItem>
+                  <SelectItem value="email">E-post</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -319,7 +337,7 @@ function App() {
                 <Input
                   id="url"
                   type="url"
-                  placeholder="https://example.com"
+                  placeholder="https://eksempel.no"
                   value={urlValue}
                   onChange={(event) => setUrlValue(event.target.value)}
                 />
@@ -372,7 +390,7 @@ function App() {
               </div>
 
               <div className="grid gap-2">
-                <Label htmlFor="resolution">Resolution</Label>
+                <Label htmlFor="resolution">Oppløsning</Label>
                 <Select
                   value={String(resolution)}
                   onValueChange={(value) =>
@@ -402,7 +420,7 @@ function App() {
               disabled={!canDownload}
               className="w-full"
             >
-              {isDownloading ? "Preparing..." : "Download QR Code"}
+              {isDownloading ? "Forbereder..." : "Last ned QR-kode"}
             </Button>
 
             {downloadError && (
@@ -413,7 +431,7 @@ function App() {
           {/* Preview: below form on small screens, right column on lg+ */}
           <div className="flex shrink-0 flex-col gap-2 lg:w-80 lg:max-w-[min(22rem,40vw)] lg:self-stretch">
             <div
-              className="grid min-h-72 place-items-center rounded-xl border bg-white p-4 lg:min-h-[18rem] lg:flex-1"
+              className="grid min-h-72 place-items-center rounded-xl border bg-white p-4 lg:min-h-72 lg:flex-1"
               aria-live="polite"
             >
               {svgMarkup ? (
@@ -423,7 +441,7 @@ function App() {
                 />
               ) : (
                 <p className="text-sm text-muted-foreground">
-                  QR preview appears here.
+                  Forhåndsvisning av QR-kode vises her.
                 </p>
               )}
             </div>
