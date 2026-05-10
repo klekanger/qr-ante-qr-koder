@@ -1,14 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
-import QRCode from "qrcode";
 import logoUrl from "@/assets/logo.webp";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -18,6 +10,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import QRCode from "qrcode";
+import { useEffect, useMemo, useState } from "react";
 
 type InputMode = "url" | "phone" | "email";
 type ExportFormat = "png" | "jpg" | "svg" | "eps";
